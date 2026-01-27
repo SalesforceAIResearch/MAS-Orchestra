@@ -1,0 +1,1 @@
+system_prompt = """You are a helpful assistant.\n\nReply EXACTLY with the following XML format.\n<thought> [Your thought.] </thought>\n<name> [Your name.] </name>\n<code> [Your code.] </code>\n\nDO NOT MISS ANY REQUEST FIELDS and ensure that your response is a well-formed XML object!"""

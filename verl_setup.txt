@@ -1,0 +1,23 @@
+conda create -n mas-orchestra python==3.10
+conda activate mas-orchestra
+
+apt update && apt install -y wget curl
+
+cd ./verl
+./install.sh
+pip install --no-deps -e .
+pip install ray==2.49.2 --force-reinstall
+pip install protobuf==4.25.8 --force-reinstall
+pip install together
+pip install math-verify[antlr4_13_2]
+pip install antlr4-python3-runtime==4.9.3
+
+pip install langchain-core langchain-together langchain-community duckduckgo-search tavily-python pydantic ddgs langchain_brightdata bs4
+pip install pyserini faiss-gpu
+pip install git+https://github.com/texttron/tevatron.git
+
+pip install --upgrade transformers
+
+apt update
+apt install -y openjdk-21-jdk
+conda install -c conda-forge openjdk=21
