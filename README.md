@@ -6,7 +6,7 @@
 </h1>
 <!-- #  Absolute Zero:  Reinforced Self-play Reasoning with Zero Data -->
 
-[![Paper](https://img.shields.io/badge/paper-A42C25?style=for-the-badge&logo=arxiv&logoColor=white)](https://arxiv.org/abs/2601.14652)    [![Project Page](https://img.shields.io/badge/Project%20Page-blue?style=for-the-badge&logo=snowflake&logoColor=white&labelColor=black)](https://vincent950129.github.io/mas-design/index.html)    [![Github](https://img.shields.io/badge/Code-000000?style=for-the-badge&logo=github&logoColor=000&logoColor=white)](https://github.com/SalesforceAIResearch/MAS-Orchestra)    [![MAS Bench](https://img.shields.io/badge/MAS_Collection-fcd022?style=for-the-badge&logo=huggingface&logoColor=000)](https://huggingface.co/datasets/Salesforce/MASBench)
+[![Paper](https://img.shields.io/badge/paper-A42C25?style=for-the-badge&logo=arxiv&logoColor=white)](https://github.com/SalesforceAIResearch/MAS-Orchestra/blob/main/MAS_R1.pdf)    [![Project Page](https://img.shields.io/badge/Project%20Page-blue?style=for-the-badge&logo=snowflake&logoColor=white&labelColor=black)](https://vincent950129.github.io/mas-design/index.html)    [![Github](https://img.shields.io/badge/Code-000000?style=for-the-badge&logo=github&logoColor=000&logoColor=white)](https://github.com/SalesforceAIResearch/MAS-Orchestra)    [![MAS Bench](https://img.shields.io/badge/MAS_Collection-fcd022?style=for-the-badge&logo=huggingface&logoColor=000)](https://huggingface.co/datasets/Salesforce/MASBench)
 
 <div align="center" style="font-family: Arial, sans-serif;">
   <p>
@@ -35,9 +35,6 @@
 ![Conceptual Overview](figures/overview.png)
 
 <!-- ============================================== -->
-
-- **[2025/05/06]** We present the **<span style="font-variant: small-caps;">MAS-Orchestra</span>** [[Project Page](https://vincent950129.github.io/mas-design/index.html) | [Paper](https://arxiv.org/abs/2601.14652) | [Code](https://github.com/SalesforceAIResearch/MAS-Orchestra)]
- <!-- | [Model(s)](https://huggingface.co/collections/andrewzh/absolute-zero-reasoner-68139b2bca82afb00bc69e5b) | [Logs](https://wandb.ai/andrewzhao112/AbsoluteZeroReasoner)]. -->
 
 <!-- ============================================== -->
 <div align="left">
