@@ -50,21 +50,21 @@
 - 🏠 [[Project Page]](https://vincent950129.github.io/mas-design/mas_r1/)
 - 📜 [[Paper]](https://arxiv.org/abs/2601.14652)
 - 💻 [[Code]](https://github.com/SalesforceAIResearch/MAS-Orchestra)
-- 🚀 [[Live Demo]](https://vincent950129.github.io/mas-design/mas_r1/demo)
-- 🎬 [[Video Demo]](#demo) ([video link](https://drive.google.com/file/d/1FO2H-N1EemQ6_ju1b58_G5jWhs92ZRgu/view?usp=drive_link))
-
+- 🚀 [[Demo]](https://vincent950129.github.io/mas-design/mas_r1/demo)
 <!-- ============================================== -->
 <div align="left">
   <h1 id="demo">🎬 Demo</h1>
   <hr style="height: 3px; background: linear-gradient(90deg, #EF8E8D, #5755A3); border: none; border-radius: 3px;">
 </div>
 
-<p>
-  A short illustration of MAS-Orchestra (AIME24 as an example). 
+<p align="center">
+  <a href="https://vincent950129.github.io/mas-design/mas_r1/demo">
+    <img src="https://img.shields.io/badge/Try%20Live%20Demo-ff6f61?style=for-the-badge&logo=rocket&logoColor=white" alt="Try Live Demo">
+  </a>
 </p>
 
 <p align="center">
-  <a href="https://drive.google.com/file/d/1FO2H-N1EemQ6_ju1b58_G5jWhs92ZRgu/view?usp=drive_link">
+  <a href="https://vincent950129.github.io/mas-design/mas_r1/demo">
     <img src="figures/demo_teaser.png" alt="MAS-Orchestra Demo Video" width="80%">
   </a>
 </p>
@@ -164,6 +164,33 @@ python -m absolute_zero_reasoner.data_construction.process_code_reasoning_data
 | Math (AIME) | [harmony-grpo-7b-global-step-180](https://huggingface.co/ZixuanKe/harmony-grpo-7b-global-step-180) |
 | HotpotQA | [harmony-medium-grpo-7b-hotpot-global-step-250](https://huggingface.co/ZixuanKe/harmony-medium-grpo-7b-hotpot-global-step-250) |
 | BrowseComp+ | [harmony-medium-grpo-7b-browse-comp-plus-global-step-140](https://huggingface.co/ZixuanKe/harmony-medium-grpo-7b-browse-comp-plus-global-step-140) |
+
+## 🔌 Use via API
+
+The trained orchestrators can also be called via API without downloading. Check out the notebook below for usage:
+
+<p align="center">
+  <a href="https://colab.research.google.com/drive/1tOqZ7J3dA8mQPDdYT6M7y0pJqiX11eKO?usp=sharing">
+    <img src="https://img.shields.io/badge/Open%20in%20Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white" alt="Open in Colab">
+  </a>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fdiscern-stroller-recycling.ngrok-free.dev%2Fcounts&query=%24.models.math&label=%F0%9F%93%8A%20Math%20(AIME)&color=blue&style=for-the-badge" alt="Math API Calls">
+  <img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fdiscern-stroller-recycling.ngrok-free.dev%2Fcounts&query=%24.models.hotpotqa&label=%F0%9F%93%8A%20HotpotQA&color=blue&style=for-the-badge" alt="HotpotQA API Calls">
+  <img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fdiscern-stroller-recycling.ngrok-free.dev%2Fcounts&query=%24.models.browsecomp&label=%F0%9F%93%8A%20BrowseComp%2B&color=blue&style=for-the-badge" alt="BrowseComp+ API Calls">
+  <img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fdiscern-stroller-recycling.ngrok-free.dev%2Fcounts&query=%24.total&label=%F0%9F%93%8A%20Total%20Calls&color=brightgreen&style=for-the-badge" alt="Total API Calls">
+</p>
+
+<p align="center">
+  <a href="https://discern-stroller-recycling.ngrok-free.dev/charts">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="https://discern-stroller-recycling.ngrok-free.dev/chart.svg?theme=dark&legend=top-left" />
+      <source media="(prefers-color-scheme: light)" srcset="https://discern-stroller-recycling.ngrok-free.dev/chart.svg?theme=light&legend=top-left" />
+      <img alt="Call History Chart" src="https://discern-stroller-recycling.ngrok-free.dev/chart.svg?theme=light&legend=top-left" width="80%" />
+    </picture>
+  </a>
+</p>
 
 <!-- ============================================== -->
 <div align="left">
