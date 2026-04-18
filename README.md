@@ -6,7 +6,7 @@
 </h1>
 <!-- #  Absolute Zero:  Reinforced Self-play Reasoning with Zero Data -->
 
-[![Paper](https://img.shields.io/badge/paper-A42C25?style=for-the-badge&logo=arxiv&logoColor=white)](https://arxiv.org/abs/2601.14652)    [![Project Page](https://img.shields.io/badge/Project%20Page-blue?style=for-the-badge&logo=snowflake&logoColor=white&labelColor=black)](https://vincent950129.github.io/mas-design/mas_r1/)    [![Github](https://img.shields.io/badge/Code-000000?style=for-the-badge&logo=github&logoColor=000&logoColor=white)](https://github.com/SalesforceAIResearch/MAS-Orchestra)    [![MAS Bench](https://img.shields.io/badge/MAS_Bench-fcd022?style=for-the-badge&logo=huggingface&logoColor=000)](https://huggingface.co/datasets/Salesforce/MASBench)
+[![Paper](https://img.shields.io/badge/paper-A42C25?style=for-the-badge&logo=arxiv&logoColor=white)](https://arxiv.org/abs/2601.14652)    [![Project Page](https://img.shields.io/badge/Project%20Page-blue?style=for-the-badge&logo=snowflake&logoColor=white&labelColor=black)](https://vincent950129.github.io/mas-design/mas_r1/)    [![Live Demo](https://img.shields.io/badge/Live%20Demo-ff6f61?style=for-the-badge&logo=rocket&logoColor=white)](https://vincent950129.github.io/mas-design/mas_r1/demo)    [![Github](https://img.shields.io/badge/Code-000000?style=for-the-badge&logo=github&logoColor=000&logoColor=white)](https://github.com/SalesforceAIResearch/MAS-Orchestra)    [![MAS Bench](https://img.shields.io/badge/MAS_Bench-fcd022?style=for-the-badge&logo=huggingface&logoColor=000)](https://huggingface.co/datasets/Salesforce/MASBench)
 
 <div align="center" style="font-family: Arial, sans-serif;">
   <p>
@@ -37,6 +37,7 @@
 
 <!-- ============================================== -->
 
+- **[04/16/2026]** We present the Live Demo! [[Live Demo](https://vincent950129.github.io/mas-design/mas_r1/demo)]
 - **[01/29/2026]** We present the **<span style="font-variant: small-caps;">MAS-Orchestra</span>** [[Project Page](https://vincent950129.github.io/mas-design/mas_r1/) | [Paper](https://arxiv.org/abs/2601.14652) | [Code](https://github.com/SalesforceAIResearch/MAS-Orchestra)]
  <!-- | [Model(s)](https://huggingface.co/collections/andrewzh/absolute-zero-reasoner-68139b2bca82afb00bc69e5b) | [Logs](https://wandb.ai/andrewzhao112/AbsoluteZeroReasoner)]. -->
 
@@ -49,7 +50,8 @@
 - 🏠 [[Project Page]](https://vincent950129.github.io/mas-design/mas_r1/)
 - 📜 [[Paper]](https://arxiv.org/abs/2601.14652)
 - 💻 [[Code]](https://github.com/SalesforceAIResearch/MAS-Orchestra)
-- 🎬 [[Demo]](#demo) ([video link](https://drive.google.com/file/d/1FO2H-N1EemQ6_ju1b58_G5jWhs92ZRgu/view?usp=drive_link))
+- 🚀 [[Live Demo]](https://vincent950129.github.io/mas-design/mas_r1/demo)
+- 🎬 [[Video Demo]](#demo) ([video link](https://drive.google.com/file/d/1FO2H-N1EemQ6_ju1b58_G5jWhs92ZRgu/view?usp=drive_link))
 
 <!-- ============================================== -->
 <div align="left">
