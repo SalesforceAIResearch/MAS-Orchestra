@@ -10,10 +10,9 @@
 
 <div align="center" style="font-family: Arial, sans-serif;">
   <p>
+    <a href="#what-is-mas-orchestra" style="text-decoration: none; font-weight: bold;">💡 What is MAS-Orchestra</a> •
     <a href="#news" style="text-decoration: none; font-weight: bold;">🎉 News</a> •
-    <a href="#links" style="text-decoration: none; font-weight: bold;">🔗 Links</a> •
     <a href="#demo" style="text-decoration: none; font-weight: bold;">🎬 Demo</a> •
-    <a href="#todo" style="text-decoration: none; font-weight: bold;">📝 Conceptual Overview</a> •
     <!-- <a href="#algorithm-flow" style="text-decoration: none; font-weight: bold;">⚙️ Algorithm Flow</a> • -->
     <a href="#results" style="text-decoration: none; font-weight: bold;">📊 Results</a>
   </p>
@@ -33,24 +32,23 @@
 
 </div>
 
-![Conceptual Overview](figures/overview.png)
-
-<!-- ============================================== -->
-
-- **[04/16/2026]** We present the Live Demo! [[Live Demo](https://vincent950129.github.io/mas-design/mas_r1/demo)]
-- **[01/29/2026]** We present the **<span style="font-variant: small-caps;">MAS-Orchestra</span>** [[Project Page](https://vincent950129.github.io/mas-design/mas_r1/) | [Paper](https://arxiv.org/abs/2601.14652) | [Code](https://github.com/SalesforceAIResearch/MAS-Orchestra)]
- <!-- | [Model(s)](https://huggingface.co/collections/andrewzh/absolute-zero-reasoner-68139b2bca82afb00bc69e5b) | [Logs](https://wandb.ai/andrewzhao112/AbsoluteZeroReasoner)]. -->
-
 <!-- ============================================== -->
 <div align="left">
-  <h1 id="links">🔗 Links</h1>
+  <h1 id="what-is-mas-orchestra">💡 What is MAS-Orchestra</h1>
   <hr style="height: 3px; background: linear-gradient(90deg, #EF8E8D, #5755A3); border: none; border-radius: 3px;">
 </div>
 
-- 🏠 [[Project Page]](https://vincent950129.github.io/mas-design/mas_r1/)
-- 📜 [[Paper]](https://arxiv.org/abs/2601.14652)
-- 💻 [[Code]](https://github.com/SalesforceAIResearch/MAS-Orchestra)
-- 🚀 [[Demo]](https://vincent950129.github.io/mas-design/mas_r1/demo)
+![Conceptual Overview](figures/overview.png)
+
+**<span style="font-variant: small-caps;">MAS-Orchestra</span>** is an RL training framework with a function-calling abstraction for holistic multi-agent orchestration — composing an entire MAS at each step rather than building it incrementally. We also build **MASBench**, a controlled benchmark for studying when multi-agent systems outperform single-agent systems. MAS-Orchestra outperforms GPT-5 and Claude-Sonnet-4.5 by up to **23%** across **5 benchmarks** with a **10× efficiency gain**.
+
+<!-- ============================================== -->
+
+- **[05/2026]** **<span style="font-variant: small-caps;">MAS-Orchestra</span>** is accepted to **ICML 2026**!
+- **[04/2026]** We present the **Live Demo**! Start vibe-coding your MAS today! [[Live Demo](https://vincent950129.github.io/mas-design/mas_r1/demo)]
+- **[01/2026]** We present the **<span style="font-variant: small-caps;">MAS-Orchestra</span>** [[Project Page](https://vincent950129.github.io/mas-design/mas_r1/) | [Paper](https://arxiv.org/abs/2601.14652) | [Code](https://github.com/SalesforceAIResearch/MAS-Orchestra)]
+ <!-- | [Model(s)](https://huggingface.co/collections/andrewzh/absolute-zero-reasoner-68139b2bca82afb00bc69e5b) | [Logs](https://wandb.ai/andrewzhao112/AbsoluteZeroReasoner)]. -->
+
 <!-- ============================================== -->
 <div align="left">
   <h1 id="demo">🎬 Demo</h1>
@@ -157,7 +155,7 @@ pip install git+https://github.com/texttron/tevatron.git
 python -m absolute_zero_reasoner.data_construction.process_code_reasoning_data
 ``` -->
 
-## 📦 (Optional) Download Trained Orchestrators
+## 📦 (Optional) Download Orchestrator checkpoints
 
 | Task | Model |
 |------|-------|
@@ -295,9 +293,13 @@ Browse real, generated multi-agent designs produced by MAS-Orchestra. Each examp
   <hr style="height: 3px; background: linear-gradient(90deg, #EF8E8D, #5755A3); border: none; border-radius: 3px;">
 </div>
 
+🗺️ Interested readers can check out our [**roadmap**](https://mas-orchestra.salesforceresearch.ai/index.html) for more details.
+
 - **[MAS-Zero](https://github.com/SalesforceAIResearch/MAS-Zero)**: Designing Multi-Agent Systems with Zero Supervision — an inference-time self-refinement framework for automatic MAS design.
 - **[MAS-ProVe](https://github.com/Wang-ML-Lab/MAS-ProVe)**: Understanding the Process Verification of Multi-Agent Systems — analysis of process verification for multi-agent systems.
 - **[SkillOrchestra](https://github.com/jiayuww/SkillOrchestra)**: Learning to Route Agents via Skill Transfer — skill-based agent routing.
+- **[OrchRM](https://arxiv.org/abs/2606.13598)**: Reward Modeling for Multi-Agent Orchestration — a Bradley-Terry orchestration-level reward model to power best-of-N test-time scaling and reward-guided orchestrator training.
+- **[IlluMAS](https://arxiv.org/abs/2606.13003)**: The Illusion of Multi-Agent Advantage — a cost-controlled study showing automatic MAS often fail to beat SAS, introducing the SMFR diagnostic benchmark with a strong expert-designed MAS baseline.
 - **[LLM Reasoning Survey](https://llm-reasoning-ai.github.io/)**: A Survey of Frontiers in LLM Reasoning: Inference Scaling, Learning to Reason, and Agentic Systems.
 
 <!-- ============================================== -->
@@ -309,14 +311,11 @@ Browse real, generated multi-agent designs produced by MAS-Orchestra. Each examp
 If you find MAS-Orchestra helpful, please consider starring this repo and citing our work. We would be very grateful!
 
 ```bibtex
-@misc{Ke2026MASOrchestra,
+@inproceedings{Ke2026MASOrchestra,
         title        = {MAS-Orchestra: Understanding and Improving Multi-Agent Reasoning Through Holistic Orchestration and Controlled Benchmarks},
         author       = {Zixuan Ke and Yifei Ming and Austin Xu and Ryan Chin and Xuan-Phi Nguyen and Prathyusha Jwalapuram and Semih Yavuz and Caiming Xiong and Shafiq Joty},
+        booktitle    = {Proceedings of the International Conference on Machine Learning (ICML)},
         year         = {2026},
-        eprint       = {2601.14652},
-        archivePrefix= {arXiv},
-        primaryClass = {cs.AI},
-        note         = {Preprint; Work in Progress},
       }
 ```
 <!-- ============================================== -->
