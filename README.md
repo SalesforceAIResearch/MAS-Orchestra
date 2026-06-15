@@ -289,11 +289,11 @@ Browse real, generated multi-agent designs produced by MAS-Orchestra. Each examp
 
 <!-- ============================================== -->
 <div align="left">
-  <h1 id="mas-series">🤖 Check Out Our MAS Series</h1>
+  <h1 id="mas-series">🤖 Check Out Our MAS Framework and Roadmap</h1>
   <hr style="height: 3px; background: linear-gradient(90deg, #EF8E8D, #5755A3); border: none; border-radius: 3px;">
 </div>
 
-🗺️ Interested readers can check out our [**roadmap**](https://mas-orchestra.salesforceresearch.ai/index.html) for more details.
+🗺️ Over the past year, we've built a connected body of work on multi-agent systems — spanning the framework, inference-time and training-time methods, verification, analysis, and a live demo. Explore how it all fits together in our [**MAS framework and roadmap**](https://mas-orchestra.salesforceresearch.ai/index.html).
 
 - **[MAS-Zero](https://github.com/SalesforceAIResearch/MAS-Zero)**: Designing Multi-Agent Systems with Zero Supervision — an inference-time self-refinement framework for automatic MAS design.
 - **[MAS-ProVe](https://github.com/Wang-ML-Lab/MAS-ProVe)**: Understanding the Process Verification of Multi-Agent Systems — analysis of process verification for multi-agent systems.
