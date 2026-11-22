@@ -141,11 +141,14 @@ actor_rollout_ref:
       temperature: 0.5
       n: 8
       do_sample: True # default eager for validation
+    # [ToolOrchestra step 4] Single-shot MAS-Orchestra keeps multi_turn disabled. The dynamic plan-execute
+    # variant (configs/grpo_trainer_multiturn.yaml) sets enable=True, name=sglang_async, max_turns=6,
+    # format=qwen and tool_config_path=configs/tool_config/mas_agents.yaml.
     multi_turn:
       enable: False  # should set rollout.name to sglang_async if True
       max_turns: null  # null for no limit (default max_length // 3)
       tool_config_path: null  # null for no tool
-      format: chatml  # chatml, more formats will be supported in the future
+      format: chatml  # chatml or qwen (Qwen2.5 tool-response format)
 
 critic:
   rollout_n: ${actor_rollout_ref.rollout.n}

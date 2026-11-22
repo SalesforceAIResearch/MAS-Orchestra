@@ -62,6 +62,7 @@ from mas_r1_reasoner.rewards.utils.execution import (
 from mas_r1_reasoner.trainer.utils.rollout import (
     rollout_generation,
 )
+from mas_r1_reasoner.trainer.utils.rollout_multiturn import is_multi_turn_enabled
 from mas_r1_reasoner.trainer.utils.log import (
     log_mas_r1_validation_scores,
     maybe_log_val_generations_to_wandb,
@@ -312,6 +313,7 @@ class MASR1Trainer(RayPPOTrainer):
         # Store first batch data for wandb logging
         first_batch_test_batch = None
         first_batch_reward_extra_info = None
+        val_multi_turn_metrics = {}
 
         for batch_idx, batch_dict in enumerate(self.val_dataloader):
             main_rank_print(f"\n{'='*60}")
@@ -339,6 +341,8 @@ class MASR1Trainer(RayPPOTrainer):
 
 
             test_output_gen_batch = rollout_generation(self, test_gen_batch, is_validation=True)
+            # [ToolOrchestra step 2] turns / agent calls / agent usage of the multi-turn validation episodes
+            val_multi_turn_metrics.update(test_output_gen_batch.meta_info.pop('multi_turn_metrics', {}))
 
             # Union the gen_batch (which has original data) with the final output
             test_batch = batch.union(test_output_gen_batch)
@@ -351,6 +355,7 @@ class MASR1Trainer(RayPPOTrainer):
             
             reward_result = self.val_reward_fn(self, sample_outputs, is_validation=True, input_data=test_batch, return_dict=True)
             reward_tensor = reward_result["reward_tensor"]
+            val_multi_turn_metrics.update(reward_result.get("reward_metrics", {}))
             reward_extra_info = reward_result["reward_extra_info"]
             sample_outputs = reward_result["sample_outputs"]
             # execution_results_dataproto = reward_result["final_output"]
@@ -652,6 +657,7 @@ class MASR1Trainer(RayPPOTrainer):
         main_rank_print(f"Metrics: {metric_dict}")
         main_rank_print(f"{'='*80}\n")
 
+        metric_dict.update(val_multi_turn_metrics)
         return metric_dict
 
 
@@ -740,6 +746,16 @@ class MASR1Trainer(RayPPOTrainer):
                 val_metrics_converted = convert_numpy_types(val_metrics)
                 with open(os.path.join(self.config.actor_rollout_ref.model.path, f'{self.problem_type}_metrics.json'), 'w') as f:
                     json.dump(val_metrics_converted, f)
+
+            validation_data_dir = self.config.trainer.get('validation_data_dir', None)
+            if validation_data_dir:
+                import json
+                val_dir = Path(validation_data_dir)
+                val_dir.mkdir(parents=True, exist_ok=True)
+                with open(val_dir / 'val_metrics.json', 'w') as f:
+                    json.dump(convert_numpy_types(val_metrics), f, indent=2)
+                save_responses_and_ground_truth(val_dir, self.global_steps, self._current_step_responses,
+                                                self._accumulated_responses, self.save_responses_and_ground_truth)
                     
         # we start from step 1
         self.global_steps += 1
@@ -782,6 +798,8 @@ class MASR1Trainer(RayPPOTrainer):
                     # generate a batch
                     with _timer('gen', timing_raw):
                         gen_batch_output = rollout_generation(self, gen_batch, is_validation=False)
+                    # [ToolOrchestra step 2] turns / agent calls / agent usage of the multi-turn episodes
+                    metrics.update(gen_batch_output.meta_info.pop('multi_turn_metrics', {}))
 
 
                     if self.config.algorithm.adv_estimator == 'remax':
@@ -848,6 +866,7 @@ class MASR1Trainer(RayPPOTrainer):
                         # Call reward function with batch data
                         reward_result = self.reward_fn(self, train_outputs, is_validation=False, input_data=batch, return_dict=True)
                         reward_tensor = reward_result["reward_tensor"]
+                        metrics.update(reward_result.get("reward_metrics", {}))
                         reward_extra_info = reward_result["reward_extra_info"]
                         train_outputs = reward_result["sample_outputs"]
                         question_results = reward_result["question_results"]
@@ -964,11 +983,14 @@ class MASR1Trainer(RayPPOTrainer):
                             
                         else:
                             # Fall back to VERL's default advantage computation
+                            # [ToolOrchestra step 2] multi_turn=True makes GRPO use loss_mask, so agent results
+                            # (<tool_response> tokens) get no advantage.
                             batch = compute_advantage(batch,
                                                       adv_estimator=self.config.algorithm.adv_estimator,
                                                       gamma=self.config.algorithm.gamma,
                                                       lam=self.config.algorithm.lam,
-                                                      num_repeat=self.config.actor_rollout_ref.rollout.n)
+                                                      num_repeat=self.config.actor_rollout_ref.rollout.n,
+                                                      multi_turn=is_multi_turn_enabled(self.config))
 
                     # update critic
                     if self.use_critic:
@@ -980,6 +1002,8 @@ class MASR1Trainer(RayPPOTrainer):
                     # implement critic warmup
                     if self.config.trainer.critic_warmup <= self.global_steps:
                         # update actor
+                        # [ToolOrchestra step 2] dp_actor.update_policy only applies loss_mask when this flag is set
+                        batch.meta_info['multi_turn'] = is_multi_turn_enabled(self.config)
                         with _timer('update_actor', timing_raw):
                             actor_output = self.actor_rollout_wg.update_actor(batch)
                         actor_output_metrics = reduce_metrics(actor_output.meta_info['metrics'])

@@ -1,0 +1,86 @@
+# [ToolOrchestra step 4] Tool registry for verl's multi-turn SGLang rollout
+# (actor_rollout_ref.rollout.multi_turn.tool_config_path).
+# Each entry is one MAS-Orchestra agent from agents/blocks_harmony, wrapped in mas_r1_reasoner/tools/mas_agent_tools.py.
+# The shared `config` must match azr.mas_r1.agent in grpo_trainer.yaml so sub-agents behave like single-shot MAS-Orchestra.
+
+agent_runtime: &agent_runtime
+  node_model: gpt-oss-120b
+  model_sampler_map:
+    gpt-oss-120b:
+      type: OpenRouterCompletionSampler   # needs OPENROUTER_API_KEY
+      model: openai/gpt-oss-120b
+      provider:                           # prefer Together (the original MAS-Orchestra sub-agent provider)
+        order: ["together"]
+        allow_fallbacks: true
+  reasoning_effort: low
+  max_tokens: null
+  max_round: 5
+  max_sc: 5
+  mock_output: false
+  max_concurrent_calls: 64
+  timeout_s: 900
+  max_observation_chars: 6000
+
+tools:
+  - class_name: "mas_r1_reasoner.tools.mas_agent_tools.CoTAgentTool"
+    config: *agent_runtime
+    tool_schema:
+      type: "function"
+      function:
+        name: "CoTAgent"
+        description: "Chain-of-Thought agent: one LLM call that thinks step by step and then answers. Cheapest agent; good for routine sub-tasks."
+        parameters:
+          type: "object"
+          properties:
+            agent_input:
+              type: "string"
+              description: "The sub-task to solve. Use an empty string to solve the original question. A non-empty sub-task is solved with the original question prepended as context."
+          required: ["agent_input"]
+
+  - class_name: "mas_r1_reasoner.tools.mas_agent_tools.SCAgentTool"
+    config: *agent_runtime
+    tool_schema:
+      type: "function"
+      function:
+        name: "SCAgent"
+        description: "Self-Consistency agent: samples 5 Chain-of-Thought solutions and returns the majority answer. Best when you want high confidence through consensus."
+        parameters:
+          type: "object"
+          properties:
+            agent_input:
+              type: "string"
+              description: "The sub-task to solve. Use an empty string to solve the original question. A non-empty sub-task is solved with the original question prepended as context."
+          required: ["agent_input"]
+
+  - class_name: "mas_r1_reasoner.tools.mas_agent_tools.ReflexionAgentTool"
+    config: *agent_runtime
+    tool_schema:
+      type: "function"
+      function:
+        name: "ReflexionAgent"
+        description: "Reflexion agent: solves, then a critic reviews and the solver refines for up to 5 rounds. Best for complex problems that benefit from self-correction or for verifying a candidate answer."
+        parameters:
+          type: "object"
+          properties:
+            agent_input:
+              type: "string"
+              description: "The sub-task to solve. Use an empty string to solve the original question. A non-empty sub-task is solved with the original question prepended as context."
+          required: ["agent_input"]
+
+  - class_name: "mas_r1_reasoner.tools.mas_agent_tools.DebateAgentTool"
+    config: *agent_runtime
+    tool_schema:
+      type: "function"
+      function:
+        name: "DebateAgent"
+        description: "Debate agent: several role-played LLMs debate for 5 rounds and a final judge decides. Best for problems that benefit from multiple perspectives."
+        parameters:
+          type: "object"
+          properties:
+            agent_input:
+              type: "string"
+              description: "The sub-task to solve. Use an empty string to solve the original question. A non-empty sub-task is solved with the original question prepended as context."
+            debate_roles:
+              type: "array"
+              description: "At least two distinct role names, e.g. [\"Mathematics Professor\", \"Statistician\"]."
+          required: ["agent_input", "debate_roles"]

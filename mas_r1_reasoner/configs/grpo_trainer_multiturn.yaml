@@ -1,0 +1,96 @@
+# [ToolOrchestra step 4] Multi-turn (dynamic plan-execute) MAS-Orchestra.
+# Inherits everything from grpo_trainer.yaml and only overrides what the SGLang multi-turn rollout needs.
+# Launch with:  python -m mas_r1_reasoner.main_mas_r1 --config-path=configs --config-name=grpo_trainer_multiturn
+# Single-shot MAS-Orchestra is unchanged: keep using --config-name=grpo_trainer.
+
+defaults:
+  - grpo_trainer
+  - _self_
+
+data:
+  raw_data: True                       # prompts are built on the fly by helper._prepare_raw_data_batch_for_generation
+  train_batch_size: 32
+  # The response now holds every orchestrator turn AND every agent result (<tool_response>),
+  # so it is much longer than a single-shot plan. prompt + response must fit Qwen2.5-7B's 32k context.
+  max_prompt_length: 8192
+  max_validation_prompt_length: 8192
+  max_response_length: 16384
+
+actor_rollout_ref:
+  model:
+    path: Qwen/Qwen2.5-7B-Instruct
+  actor:
+    ppo_mini_batch_size: 32
+    use_dynamic_bsz: True
+    ppo_max_token_len_per_gpu: 32768   # >= max_prompt_length + max_response_length
+  rollout:
+    name: sglang_async                 # verl rollout with tool calling (verl/workers/rollout/sglang_rollout/async_sglang_rollout.py)
+    mode: sync
+    tensor_model_parallel_size: 2
+    gpu_memory_utilization: 0.5
+    max_model_len: null                # defaults to prompt_length + response_length
+    n: 8                               # episodes per question (GRPO group size)
+    val_kwargs:
+      temperature: 0.5
+      top_p: 1.0
+      top_k: -1
+      n: 8                             # Avg@8, same as the single-shot AIME evaluation
+      do_sample: True
+    multi_turn:
+      enable: True
+      max_turns: 6                     # max orchestrator generations per episode
+      format: qwen                     # Qwen2.5 chat format: tool results go into <tool_response> user turns
+      # Pass an absolute path from the launch script if Ray workers do not start in the repo root.
+      tool_config_path: mas_r1_reasoner/configs/tool_config/mas_agents.yaml
+
+azr:
+  problem_type: harmony_multiturn      # selects the multi-turn prompts (agents/common.py) and parser (harmony_parser/multiturn.py)
+  mas_r1:
+    execution_success_weight: 0.0
+    final_answer_weight: 1.0
+    multiply_processes: 0
+    max_ray_workers: 1
+    # ToolOrchestra reward (rewards/utils/toolorchestra_reward.py):
+    #   R = preference . minmax_group([calls per agent, correct, -cost, -latency])  if correct, else 0
+    # Applied to training rollouts; validation keeps the 0/1 outcome reward and logs cost/latency.
+    toolorchestra_reward:
+      enable: True
+      preference:                      # P; same weights as ToolOrchestra's efficiency-aware preference
+        accuracy: 1.0
+        cost: 0.1
+        latency: 0.1
+        CoTAgent: 0.0                  # > 0 rewards using an agent more often, < 0 penalises it
+        SCAgent: 0.0
+        ReflexionAgent: 0.0
+        DebateAgent: 0.0
+      orchestrator_price_per_million:  # $ per 1M orchestrator tokens, added to the agents' OpenRouter cost
+        input: 0.2                     # ToolOrchestra's price for its 8B orchestrator
+        output: 0.2
+    agent:
+      # Must match the `agent_runtime` block of the tool config above.
+      model_name: gpt-oss-120b
+      reasoning_effort: low
+      temperature: 0.5
+      init_archive: ['COT', 'COT_SC', 'Reflexion', 'LLM_debate']
+      model_sampler_map:
+        gpt-oss-120b:
+          type: OpenRouterCompletionSampler   # needs OPENROUTER_API_KEY
+          model: openai/gpt-oss-120b
+          provider:
+            order: ["together"]
+            allow_fallbacks: true
+
+trainer:
+  logger: ['console', 'wandb']
+  project_name: multi-agent-experiments          # W&B project
+  experiment_name: harmony_multiturn_grpo_7b_gpt_oss_120b
+  n_gpus_per_node: 8
+  total_training_steps: 180            # same number of steps as the released harmony checkpoint (global_step_180)
+  val_before_train: True               # step-0 baseline of the untrained orchestrator
+  test_freq: 25                        # AIME24 Avg@8 = 240 agent episodes per validation
+  save_freq: 50
+  max_actor_ckpt_to_keep: 1            # only the latest checkpoint is kept on disk
+  resume_mode: auto                    # resubmitting the same RUN_NAME continues from the last checkpoint
+  checkpoint_root: /scratch/project/prj-02-llm-reasoning-shakkottai/Multi_agent_systems
+  default_local_dir: ${trainer.checkpoint_root}/${trainer.experiment_name}/checkpoints
+  validation_data_dir: ${trainer.checkpoint_root}/${trainer.experiment_name}/val

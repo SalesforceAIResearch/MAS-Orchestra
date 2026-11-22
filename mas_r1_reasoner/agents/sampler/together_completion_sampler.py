@@ -74,6 +74,9 @@ class TogetherCompletionSampler(SamplerBase):
     def _pack_message(self, role: str, content: Any):
         return {"role": str(role), "content": content}
 
+    async def _create_completion(self, api_params: dict):
+        return await self.client.chat.completions.create(**api_params)
+
 
     async def __call__(self, message_list: MessageList, temperature=None, output_fields=None) -> str:
             
@@ -146,7 +149,7 @@ class TogetherCompletionSampler(SamplerBase):
                         api_params["max_tokens"] = max_tokens
                         print(f"  - Add Max tokens: {max_tokens}")
 
-                    response = await self.client.chat.completions.create(**api_params)
+                    response = await self._create_completion(api_params)
                     
                     print(f"✓ Async API request successful")
                     content = response.choices[0].message.content

@@ -184,7 +184,8 @@ def _prepare_raw_data_batch_for_generation(self, batch: DataProto) -> DataProto:
             system_prompt, mas_prompt = get_known_prompt("PLACEHOLDER_QUESTION", known_prompt)
             developer_prompt = None
         else:
-            if problem_type in ["harmony_minimal", "harmony_medium"]:
+            # [ToolOrchestra step 3] harmony_multiturn uses the dynamic plan-execute prompts (agents/common.py:get_prompt)
+            if problem_type in ["harmony_minimal", "harmony_medium", "harmony_multiturn"]:
                 system_prompt, mas_prompt, developer_prompt = get_prompt("PLACEHOLDER_QUESTION")
             else:
                 # Use dynamic prompt as before
@@ -213,6 +214,7 @@ def _prepare_raw_data_batch_for_generation(self, batch: DataProto) -> DataProto:
     all_input_ids = []
     all_attention_masks = []
     all_position_ids = []
+    all_chat_templates = []
     
     # Check if add_judge is enabled and pre-execute building blocks for the entire batch
     add_judge = get_global("global_add_judge")
@@ -271,6 +273,7 @@ def _prepare_raw_data_batch_for_generation(self, batch: DataProto) -> DataProto:
                         placeholder = "[" + block_key + "]"
                         msg["content"] = msg["content"].replace(placeholder, truncated_output)
                 break
+        all_chat_templates.append(chat_template)
         
         # Apply chat template
         if hasattr(self.tokenizer, 'apply_chat_template') and getattr(self.tokenizer, 'chat_template', None):
@@ -338,6 +341,12 @@ def _prepare_raw_data_batch_for_generation(self, batch: DataProto) -> DataProto:
     
     # Now pop the tensors for generation (standard behavior)
     gen_batch = batch.pop(batch_keys=['input_ids', 'attention_mask', 'position_ids'])
+
+    # [ToolOrchestra step 2] The SGLang multi-turn rollout re-applies the chat template itself (with the agent
+    # tool schemas injected), so it needs the chat messages and per-episode tool kwargs, not just input_ids.
+    from mas_r1_reasoner.trainer.utils.rollout_multiturn import is_multi_turn_enabled, attach_multiturn_inputs
+    if is_multi_turn_enabled(self.config):
+        gen_batch = attach_multiturn_inputs(self, gen_batch, all_chat_templates, questions)
     
     return gen_batch
 

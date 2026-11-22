@@ -25,6 +25,12 @@ from verl.protocol import pad_dataproto_to_divisor, unpad_dataproto
 
 
 def rollout_generation(trainer_instance, gen_batch: DataProto, is_validation: bool) -> DataProto:
+    # [ToolOrchestra step 2] Multi-turn plan-execute rollout when actor_rollout_ref.rollout.multi_turn.enable=True;
+    # otherwise the original single-shot generation below is unchanged.
+    from mas_r1_reasoner.trainer.utils.rollout_multiturn import is_multi_turn_enabled, multi_turn_rollout_generation
+    if is_multi_turn_enabled(trainer_instance.config):
+        return multi_turn_rollout_generation(trainer_instance, gen_batch, is_validation)
+
         # Generate sequences
     if is_validation:
 

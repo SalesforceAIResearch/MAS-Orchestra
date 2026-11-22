@@ -38,7 +38,11 @@ def extract_harmony_code_from_response(response_text: str, validate_python_code,
     if use_igsm_prompt is None:
         use_igsm_prompt = False
     
-    if problem_type == 'harmony_minimal':
+    if problem_type == 'harmony_multiturn':
+        # [ToolOrchestra step 2] Agents already ran during the multi-turn rollout; only the final <answer> is parsed
+        from mas_r1_reasoner.rewards.utils.harmony_parser.multiturn import extract_harmony_code_from_response as multiturn_extract
+        return multiturn_extract(response_text, validate_python_code, logger)
+    elif problem_type == 'harmony_minimal':
         # Use minimal parser for harmony_minimal (0-1 agents)
         from mas_r1_reasoner.rewards.utils.harmony_parser.minimal import extract_harmony_code_from_response as minimal_extract
         return minimal_extract(response_text, validate_python_code, logger)

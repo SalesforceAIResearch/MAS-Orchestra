@@ -27,7 +27,9 @@ from mas_r1_reasoner.rewards.utils.extraction import (
     generate_and_extract_codes,
 )
 from mas_r1_reasoner.rewards.utils.reformat import from_question_results_to_execution_results
+from mas_r1_reasoner.rewards.utils.toolorchestra_reward import attach_episode_stats, compute_toolorchestra_reward, reward_config
 from mas_r1_reasoner.rewards.mas_r1_reward_manager import MASR1RewardManager
+from mas_r1_reasoner.trainer.utils.rollout_multiturn import is_multi_turn_enabled
 
 
 def handle_direct_answers_after_execution(question_results: Dict, is_validation: bool) -> Dict:
@@ -98,7 +100,8 @@ def handle_direct_answers_after_execution(question_results: Dict, is_validation:
                     'response_idx': value.get('response_idx', 0),
                     'ground_truth': value.get('ground_truth', ''),
                     'code': '',  # No code for direct answers
-                    'is_validation': is_validation
+                    'is_validation': is_validation,
+                    'episode_stats': value.get('episode_stats'),  # multi-turn agent usage / cost / latency
                 }
                 
                 if answer:
@@ -155,8 +158,15 @@ class HarmonyRewardManager(MASR1RewardManager):
         )
 
         # Step 4: Execute codes and store results using shared function
-        main_rank_print("execute_codes_and_store_results")
-        question_results = execute_codes_and_store_results(trainer_instance, question_results, is_validation=is_validation)
+        # [ToolOrchestra step 2] In multi-turn mode the agents already ran inside the rollout loop, so there is no
+        # MAS code to execute; every episode is a direct answer handled in Step 5.
+        from mas_r1_reasoner.trainer.utils.rollout_multiturn import is_multi_turn_enabled
+        if is_multi_turn_enabled(trainer_instance.config):
+            main_rank_print("Multi-turn mode: skipping MAS code execution (agents executed during rollout)")
+            attach_episode_stats(trainer_instance, question_results, mas_code_generation_output, is_validation)
+        else:
+            main_rank_print("execute_codes_and_store_results")
+            question_results = execute_codes_and_store_results(trainer_instance, question_results, is_validation=is_validation)
 
         # Step 5: Handle direct answers after executio
         main_rank_print("handle_direct_answers_after_execution")
@@ -253,6 +263,16 @@ class HarmonyRewardManager(MASR1RewardManager):
         # Call _compute_normal_reward directly - semaphore is now inside the method
         import asyncio
         reward_tensor, reward_extra_info = asyncio.run(self._compute_normal_reward(data, execution_results, execution_stats))
+
+        # ToolOrchestra reward: outcome x preference over agent usage, cost and latency (training only;
+        # validation keeps the outcome reward so val scores stay accuracies, and only logs cost/latency).
+        reward_metrics = {}
+        toolorchestra_cfg = reward_config(trainer_instance.config)
+        if toolorchestra_cfg is not None and is_multi_turn_enabled(trainer_instance.config):
+            reward_tensor, reward_metrics = compute_toolorchestra_reward(
+                data, reward_tensor, reward_extra_info['final_answer_correctness'], toolorchestra_cfg,
+                apply=not is_validation, prefix="val" if is_validation else "train",
+            )
         
         main_rank_print(f"Reward computation completed for {len(data)} questions")
         main_rank_print(f"{'='*60}\n")
@@ -322,6 +342,7 @@ class HarmonyRewardManager(MASR1RewardManager):
                 "reward_extra_info": reward_extra_info,
                 "sample_outputs": sample_outputs,
                 "question_results": question_results,
+                "reward_metrics": reward_metrics,
                 # "final_output": final_output,
                 "expanded_data": data_for_training  # Return the padded data for trainer to update input_data
             }

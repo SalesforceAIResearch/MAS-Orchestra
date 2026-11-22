@@ -1,0 +1,81 @@
+# [ToolOrchestra step 4] Same tools as mas_agents.yaml, but sub-agents return mock outputs (no API calls).
+# Used by smoke_test_multiturn.sh to check tool-call parsing, loss masks and reward extraction for free.
+
+agent_runtime: &agent_runtime
+  node_model: gpt-oss-120b
+  model_sampler_map:
+    gpt-oss-120b:
+      type: OpenRouterCompletionSampler
+      model: openai/gpt-oss-120b
+  reasoning_effort: low
+  max_tokens: null
+  max_round: 5
+  max_sc: 5
+  mock_output: true
+  max_concurrent_calls: 64
+  timeout_s: 60
+  max_observation_chars: 6000
+
+tools:
+  - class_name: "mas_r1_reasoner.tools.mas_agent_tools.CoTAgentTool"
+    config: *agent_runtime
+    tool_schema:
+      type: "function"
+      function:
+        name: "CoTAgent"
+        description: "Chain-of-Thought agent (mock)."
+        parameters:
+          type: "object"
+          properties:
+            agent_input:
+              type: "string"
+              description: "The sub-task to solve, or an empty string for the original question."
+          required: ["agent_input"]
+
+  - class_name: "mas_r1_reasoner.tools.mas_agent_tools.SCAgentTool"
+    config: *agent_runtime
+    tool_schema:
+      type: "function"
+      function:
+        name: "SCAgent"
+        description: "Self-Consistency agent (mock)."
+        parameters:
+          type: "object"
+          properties:
+            agent_input:
+              type: "string"
+              description: "The sub-task to solve, or an empty string for the original question."
+          required: ["agent_input"]
+
+  - class_name: "mas_r1_reasoner.tools.mas_agent_tools.ReflexionAgentTool"
+    config: *agent_runtime
+    tool_schema:
+      type: "function"
+      function:
+        name: "ReflexionAgent"
+        description: "Reflexion agent (mock)."
+        parameters:
+          type: "object"
+          properties:
+            agent_input:
+              type: "string"
+              description: "The sub-task to solve, or an empty string for the original question."
+          required: ["agent_input"]
+
+  - class_name: "mas_r1_reasoner.tools.mas_agent_tools.DebateAgentTool"
+    config: *agent_runtime
+    tool_schema:
+      type: "function"
+      function:
+        name: "DebateAgent"
+        description: "Debate agent (mock)."
+        parameters:
+          type: "object"
+          properties:
+            agent_input:
+              type: "string"
+              description: "The sub-task to solve, or an empty string for the original question."
+            debate_roles:
+              type: "array"
+              description: "At least two distinct role names."
+          required: ["agent_input", "debate_roles"]

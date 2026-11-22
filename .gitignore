@@ -1,0 +1,6 @@
+checkpoints/
+data/
+eval_results/
+logs/
+__pycache__/
+*.pyc

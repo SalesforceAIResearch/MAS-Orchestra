@@ -4,6 +4,7 @@ from typing import Dict, Tuple, Callable
 from verl import DataProto
 from mas_r1_reasoner.agents.sampler.chat_completion_sampler import ChatCompletionSampler
 from mas_r1_reasoner.agents.sampler.together_completion_sampler import TogetherCompletionSampler
+from mas_r1_reasoner.agents.sampler.openrouter_completion_sampler import OpenRouterCompletionSampler
 from mas_r1_reasoner.agents.sampler.vllm_completion_sampler import VLLMCompletionSampler
 from mas_r1_reasoner.agents.shared_vars import set_global, get_global
 from mas_r1_reasoner.agents.common import main_rank_print, get_prompt
@@ -69,6 +70,18 @@ class BaseDatasetProcessor:
                         system_message=sampler_config.get('system_message', None),
                         mock_output=mock_output
                     )
+                elif sampler_type == 'OpenRouterCompletionSampler':
+                    model_name_to_use = sampler_config.get('model', model_name)
+                    if not model_name_to_use:
+                        raise ValueError(f"Model name not specified for sampler '{model_name}'. Please specify a 'model' field in the sampler configuration.")
+
+                    model_sampler_map[model_name] = OpenRouterCompletionSampler(
+                        model=model_name_to_use,
+                        temperature=sampler_config.get('temperature', 0.5),
+                        system_message=sampler_config.get('system_message', None),
+                        mock_output=mock_output,
+                        provider=sampler_config.get('provider', None),
+                    )
                 elif sampler_type == 'VLLMCompletionSampler':
                     # Create VLLM sampler
                     model_name_to_use = sampler_config.get('model', model_name)
@@ -81,7 +94,7 @@ class BaseDatasetProcessor:
                         system_message=sampler_config.get('system_message', None)
                     )
                 else:
-                    raise ValueError(f"Unsupported sampler type '{sampler_type}' for model '{model_name}'. Only 'ChatCompletionSampler', 'TogetherCompletionSampler', and 'VLLMCompletionSampler' are supported.")
+                    raise ValueError(f"Unsupported sampler type '{sampler_type}' for model '{model_name}'. Only 'ChatCompletionSampler', 'TogetherCompletionSampler', 'OpenRouterCompletionSampler', and 'VLLMCompletionSampler' are supported.")
             else:
                 # Default sampler - but require a valid model name
                 if not model_name or model_name == "":

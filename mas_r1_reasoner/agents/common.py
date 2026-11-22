@@ -241,6 +241,10 @@ def get_prompt(question, sub_task=None, level=1):
             else:
                 from mas_r1_reasoner.agents.prompts.user_prompt.propose_harmony_minmal import base
         EXAMPLE = ''
+    elif problem_type == 'harmony_multiturn':
+        # [ToolOrchestra step 3] Dynamic plan-execute prompt (agents are called as tools turn by turn)
+        from mas_r1_reasoner.agents.prompts.user_prompt.propose_harmony_multiturn import base
+        EXAMPLE = ''
     elif problem_type == 'harmony_medium':
         if use_igsm_prompt:
             # Get the IGSM variant (breadth, depth, horizon, parallel, or combine)
@@ -333,6 +337,24 @@ def get_prompt(question, sub_task=None, level=1):
         developer_prompt = developer_prompt.replace("[Debate]", llm_debate)        
         developer_prompt = developer_prompt.replace("[Reflexion]", reflexion)        
         system_prompt = system_prompt.replace("[MODEL]", node_model)        
+
+        return system_prompt, prompt, developer_prompt
+
+    elif problem_type == 'harmony_multiturn':
+        # [ToolOrchestra step 3] Same four agents as harmony_minimal. Only name/description/arguments are shown:
+        # the implementation source is omitted because the agents are executed by the tool environment, and the
+        # tool schemas are already injected by the chat template.
+        from mas_r1_reasoner.agents.prompts.system_prompt.harmony_multiturn import system_prompt
+        from mas_r1_reasoner.agents.prompts.developer_prompt.harmony_multiturn import developer_prompt
+
+        def _agent_card(block):
+            return json.dumps({k: v for k, v in block.items() if k != "implementation"})
+
+        developer_prompt = developer_prompt.replace("[COT]", _agent_card(archive[0]))
+        developer_prompt = developer_prompt.replace("[COT_SC]", _agent_card(archive[1]))
+        developer_prompt = developer_prompt.replace("[Reflexion]", _agent_card(archive[2]))
+        developer_prompt = developer_prompt.replace("[Debate]", _agent_card(archive[3]))
+        system_prompt = system_prompt.replace("[MODEL]", node_model)
 
         return system_prompt, prompt, developer_prompt
 

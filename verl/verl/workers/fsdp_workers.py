@@ -111,6 +111,14 @@ class ActorRolloutRefWorker(Worker):
         if not torch.distributed.is_initialized():
             rank = int(os.environ.get("RANK", 0))
             world_size = int(os.environ.get("WORLD_SIZE", 1))
+            # Device-mesh subgroups (e.g. the rollout TP group) ignore init_process_group's timeout and read these module
+            # defaults, so they are overridden here. Multi-turn rollouts with slow tool calls can exceed the 30 min default.
+            if os.environ.get("VERL_DIST_TIMEOUT_S"):
+                from datetime import timedelta
+
+                import torch.distributed.distributed_c10d as c10d
+
+                c10d.default_pg_timeout = c10d.default_pg_nccl_timeout = timedelta(seconds=float(os.environ["VERL_DIST_TIMEOUT_S"]))
             torch.distributed.init_process_group(backend="cpu:gloo,cuda:nccl" if is_cuda_available else "cpu:gloo,npu:hccl", rank=rank, world_size=world_size)
 
         # build device mesh for FSDP

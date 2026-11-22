@@ -15,6 +15,8 @@
 Note that we don't combine the main with ray_trainer as ray_trainer is used by other main.
 """
 
+import os
+
 import hydra
 import ray
 
@@ -32,9 +34,12 @@ def main(config):
 def run_ppo(config) -> None:
     if not ray.is_initialized():
         # this is for local ray cluster
+        env_vars = {"TOKENIZERS_PARALLELISM": "true", "NCCL_DEBUG": "WARN", "VLLM_LOGGING_LEVEL": "WARN",
+                    "VLLM_ALLOW_RUNTIME_LORA_UPDATING": "true"}
+        if os.environ.get("VERL_DIST_TIMEOUT_S"):
+            env_vars["VERL_DIST_TIMEOUT_S"] = os.environ["VERL_DIST_TIMEOUT_S"]
         ray.init(
-            runtime_env={"env_vars": {"TOKENIZERS_PARALLELISM": "true", "NCCL_DEBUG": "WARN", "VLLM_LOGGING_LEVEL": "WARN",
-             "VLLM_ALLOW_RUNTIME_LORA_UPDATING": "true"}},
+            runtime_env={"env_vars": env_vars},
             num_cpus=config.ray_init.num_cpus,
         )
 

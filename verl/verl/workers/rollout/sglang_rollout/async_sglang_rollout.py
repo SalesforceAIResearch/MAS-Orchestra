@@ -103,6 +103,12 @@ class AsyncSGLangRollout(BaseRollout):
         self._init_distributed_env(device_mesh_cpu=device_mesh, **kwargs)
 
         self._verify_config(model_hf_config=model_hf_config)
+        # SGLang installs uvloop's policy, whose get_event_loop() never creates a loop, and the Ray worker's
+        # main thread has none; the engine and the rollout loop below call asyncio.get_event_loop().
+        try:
+            asyncio.get_event_loop()
+        except RuntimeError:
+            asyncio.set_event_loop(asyncio.new_event_loop())
         # initialize the inference engine
         self._init_inference_engine(trust_remote_code, actor_module, port)
 
@@ -642,6 +648,7 @@ class AsyncSGLangRollout(BaseRollout):
         prompt_loss_mask, response_loss_mask = [], []
         messages = []
         reward_scores = []
+        tool_metrics = []
         for req in sorted_output_req_list:
             assert req.state == AsyncRolloutRequestStateEnum.COMPLETED, f"Request {req.request_id} is not completed"
             assert len(req.input_ids) == len(req.attention_mask) == len(req.position_ids) == len(req.loss_mask), f"""Request {req.request_id} has different length of 
@@ -673,6 +680,7 @@ class AsyncSGLangRollout(BaseRollout):
             response_loss_mask.append(torch.tensor(req.response_loss_mask, dtype=torch.int, device=tgt_device))
             messages.append({"messages": req.messages})
             reward_scores.append(req.reward_scores)
+            tool_metrics.append(dict(req.metrics))
 
         prompt_ids = pad_sequence(prompt_ids, batch_first=True, padding_value=self.pad_token_id, padding_side="left")
         if prompt_ids.shape[1] < self.config.prompt_length:
@@ -722,7 +730,11 @@ class AsyncSGLangRollout(BaseRollout):
         if self.config.free_cache_engine and self._engine is not None and self._tp_rank == 0:
             self._engine.flush_cache()
 
-        return DataProto(batch=batch, non_tensor_batch={"messages": np.array(messages), "reward_scores": np.array(reward_scores)})
+        # tool_metrics[i] = {tool_name: [metrics dict returned by each execute() call]}; used for cost/latency rewards
+        return DataProto(
+            batch=batch,
+            non_tensor_batch={"messages": np.array(messages), "reward_scores": np.array(reward_scores), "tool_metrics": np.array(tool_metrics, dtype=object)},
+        )
 
     def _preprocess_prompt_to_async_rollout_requests(self, prompts: DataProto, n: int) -> list[AsyncRolloutRequest]:
         assert "raw_prompt" in prompts.non_tensor_batch, "need data.return_raw_chat=True, due to no official way do parse_messages"
